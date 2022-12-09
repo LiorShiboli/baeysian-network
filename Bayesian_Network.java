@@ -35,7 +35,6 @@ public Bayesian_Network(String file){
             if (node.getNodeType() == Node.ELEMENT_NODE) {
 
                 Element variable = (Element) node;
-                //name,just for the test
                 String variableName= (String) variable.getElementsByTagName("NAME").item(0).getTextContent();
                 //get the outcomes
                 NodeList outcomesList =variable.getElementsByTagName("OUTCOME");
@@ -48,7 +47,22 @@ public Bayesian_Network(String file){
 
         }
 
-        // for each
+
+
+        NodeList CPTdefinitions = document.getElementsByTagName("DEFINITION");
+        HashMap<String,CPTNode> CPTNodes=new HashMap<String,CPTNode>();
+        for (int variableNum = 0; variableNum < variableList.getLength() ; variableNum++) {
+            System.out.println(variableNum);
+            Node node = variableList.item(variableNum);
+            if (node.getNodeType() == Node.ELEMENT_NODE) {
+
+                Element definition = (Element) node;
+                CPTNode CPT= new CPTNode(varOutcomes,definition);
+                CPTNodes.put(CPT.getVariable(), CPT);
+            }
+
+        }
+
     } catch (ParserConfigurationException e) {
         e.printStackTrace();
     } catch (SAXException e) {
