@@ -30,7 +30,6 @@ public Bayesian_Network(String file){
         //construct variableOutcomes
         HashMap<String,String[]> varOutcomes = new HashMap<String,String[]>();
         for (int variableNum = 0; variableNum < variableList.getLength() ; variableNum++) {
-            System.out.println(variableNum);
             Node node = variableList.item(variableNum);
             if (node.getNodeType() == Node.ELEMENT_NODE) {
 
@@ -51,9 +50,9 @@ public Bayesian_Network(String file){
 
         NodeList CPTdefinitions = document.getElementsByTagName("DEFINITION");
         HashMap<String,CPTNode> CPTNodes=new HashMap<String,CPTNode>();
-        for (int variableNum = 0; variableNum < variableList.getLength() ; variableNum++) {
-            System.out.println(variableNum);
-            Node node = variableList.item(variableNum);
+        for (int definitionNum = 0; definitionNum < CPTdefinitions.getLength() ;definitionNum++) {
+            System.out.println(definitionNum);
+            Node node = CPTdefinitions.item(definitionNum);
             if (node.getNodeType() == Node.ELEMENT_NODE) {
 
                 Element definition = (Element) node;
@@ -62,6 +61,8 @@ public Bayesian_Network(String file){
             }
 
         }
+        this.variableOutcomes=varOutcomes;
+        this.CPTNodes=CPTNodes;
 
     } catch (ParserConfigurationException e) {
         e.printStackTrace();

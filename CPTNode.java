@@ -9,7 +9,11 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.Set;
 public class CPTNode {
     //the variable to which the cpt belongs to and the parents(variables he depends on)
     private String variable;
@@ -19,9 +23,39 @@ public class CPTNode {
     private HashMap<String,Float> CPT;
 
     public CPTNode(HashMap<String,String[]> variables, Element definition){
+        //get variable
+        System.out.println("started cpt");
+        String variableName= (String) definition.getElementsByTagName("FOR").item(0).getTextContent();
 
+        //get the parents
 
-        permutation_iterator itr= new permutation_iterator(variables, parents);
+        NodeList parentsList =definition.getElementsByTagName("GIVEN");
+        String[] parents= new String[parentsList.getLength()];
+        for (int i = 0; i < parentsList.getLength() ; i++) {
+            parents[i] = parentsList.item(i).getTextContent();
+        }
+
+        this.parents=parents;
+        this.variable=variableName;
+        String[] order=new String[parents.length+1];
+        order[0]=this.variable;
+        for (int i = 0; i < parents.length; i++) {
+            order[i+1]=parents[i];
+        }
+        HashMap<String, String[]> subMap = new HashMap<String, String[]>(variables);
+        subMap.keySet().retainAll(Arrays.asList(parents));
+        this.CPT= new HashMap<String,Float>();
+        permutation_iterator itr= new permutation_iterator(variables, order);
+        String[] table=definition.getElementsByTagName("TABLE").item(0).getTextContent().split(" ");
+        String[] permutation= itr.getPermutation();
+        for (int i = 0; i<table.length ; i++, permutation=itr.next()) {
+            String key="";
+            for (int j = 0; j < permutation.length; j++) {
+                key=key.concat(permutation[j]);
+            }
+            System.out.println(key);
+            this.CPT.put(key,Float.valueOf(table[i]));
+        }
 
     }
 
