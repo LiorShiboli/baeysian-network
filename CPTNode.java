@@ -10,6 +10,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 import java.util.Map;
@@ -35,6 +36,7 @@ public class CPTNode {
             parents[i] = parentsList.item(i).getTextContent();
         }
 
+        Collections.reverse(Arrays.asList(parents));
         this.parents=parents;
         this.variable=variableName;
         String[] order=new String[parents.length+1];
