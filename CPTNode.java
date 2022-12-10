@@ -25,7 +25,6 @@ public class CPTNode {
 
     public CPTNode(HashMap<String,String[]> variables, Element definition){
         //get variable
-        System.out.println("started cpt");
         String variableName= (String) definition.getElementsByTagName("FOR").item(0).getTextContent();
 
         //get the parents
@@ -35,10 +34,11 @@ public class CPTNode {
         for (int i = 0; i < parentsList.getLength() ; i++) {
             parents[i] = parentsList.item(i).getTextContent();
         }
-
+        //assign parents and variable
         Collections.reverse(Arrays.asList(parents));
         this.parents=parents;
         this.variable=variableName;
+        //
         String[] order=new String[parents.length+1];
         order[0]=this.variable;
         for (int i = 0; i < parents.length; i++) {
@@ -55,7 +55,6 @@ public class CPTNode {
             for (int j = 0; j < permutation.length; j++) {
                 key=key.concat(permutation[j]);
             }
-            System.out.println(key);
             this.CPT.put(key,Float.valueOf(table[i]));
         }
 

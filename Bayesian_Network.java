@@ -51,7 +51,6 @@ public Bayesian_Network(String file){
         NodeList CPTdefinitions = document.getElementsByTagName("DEFINITION");
         HashMap<String,CPTNode> CPTNodes=new HashMap<String,CPTNode>();
         for (int definitionNum = 0; definitionNum < CPTdefinitions.getLength() ;definitionNum++) {
-            System.out.println(definitionNum);
             Node node = CPTdefinitions.item(definitionNum);
             if (node.getNodeType() == Node.ELEMENT_NODE) {
 

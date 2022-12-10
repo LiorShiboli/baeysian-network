@@ -6,7 +6,7 @@ public class permutation_iterator implements Iterator<String[]> {
     private String[] variables;
     private int[] indexes;
     public permutation_iterator(HashMap<String,String[]> variableOutcomes,String[] variables ){
-        System.out.println("started iterator");
+        
         this.variableOutcomes=variableOutcomes;
         this.variables=variables;
         indexes= new int[variables.length];
