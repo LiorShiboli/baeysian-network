@@ -72,4 +72,13 @@ public Bayesian_Network(String file){
     }
 
 }
+
+public float naiveQuery(String[] givenVariables,String[] givenVariableOutcomes,String givenQuery,String givenQueryOutcome){
+    float probability=0;
+
+
+
+    return probability;
+
+}
 }
