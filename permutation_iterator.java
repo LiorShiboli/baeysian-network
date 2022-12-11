@@ -4,25 +4,28 @@ import java.util.Iterator;
 public class permutation_iterator implements Iterator<String[]> {
     private HashMap<String,String[]> variableOutcomes;
     private String[] variables;
-    private int[] indexes;
+    private HashMap<String,Integer> indexes;
     public permutation_iterator(HashMap<String,String[]> variableOutcomes,String[] variables ){
         
         this.variableOutcomes=variableOutcomes;
         this.variables=variables;
-        indexes= new int[variables.length];
+        for (String variable : variables) {
+            indexes.put(variable, 0);
+        }
+        
     }
     public String[] getPermutation(){
         String[] permutation=new String[variables.length];
-        for (int j = 0; j < indexes.length; j++) {
-            permutation[j]=variableOutcomes.get(variables[j])[indexes[j]];
+        for (int j = 0; j < variables.length; j++) {
+            permutation[j]=variableOutcomes.get(variables[j])[indexes.get(variables[j])];
         }
         return permutation;
 
     }
     @Override
     public boolean hasNext() {
-        for (int i = 0; i < indexes.length; i++) {
-            if (indexes[i]<(variableOutcomes.get(variables[i]).length-1)) {
+        for (int i = 0; i < variables.length; i++) {
+            if (indexes.get(variables[i])<(variableOutcomes.get(variables[i]).length-1)) {
                 return true;
             }
         }
@@ -33,17 +36,20 @@ public class permutation_iterator implements Iterator<String[]> {
     public String[] next() {
         if (hasNext()) {
             int i=0;
-            for ( i = 0; (i < indexes.length)&&indexes[i]==(variableOutcomes.get(variables[i]).length-1); i++) {
-                indexes[i]=0;
+            for ( i = 0; (i < variables.length)&&indexes.get(variables[i])==(variableOutcomes.get(variables[i]).length-1); i++) {
+                indexes.put(variables[i],0);
             }
-        indexes[i]++;
+        indexes.put(variables[i],indexes.get(variables[i])+1);
         String[] permutation=new String[this.variables.length];
-        for (int j = 0; j < indexes.length; j++) {
-            permutation[j]=variableOutcomes.get(variables[j])[indexes[j]];
+        for (int j = 0; j < variables.length; j++) {
+            permutation[j]=variableOutcomes.get(variables[j])[indexes.get(variables[j])];
         }
         return permutation;
         }
         return null;
     }
+ public String get_outcomes(String variable){
     
+    return variableOutcomes.get(variable)[indexes.get(variable)];
+ }   
 }

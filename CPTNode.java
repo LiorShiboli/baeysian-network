@@ -34,10 +34,9 @@ public class CPTNode {
         for (int i = 0; i < parentsList.getLength() ; i++) {
             parents[i] = parentsList.item(i).getTextContent();
         }
-        //assign parents and variable
+       
         Collections.reverse(Arrays.asList(parents));
-        this.parents=parents;
-        this.variable=variableName;
+       
         //
         String[] order=new String[parents.length+1];
         order[0]=this.variable;
@@ -57,6 +56,9 @@ public class CPTNode {
             }
             this.CPT.put(key,Float.valueOf(table[i]));
         }
+         //assign parents and variable
+        this.parents=parents;
+        this.variable=variableName;
 
     }
 
