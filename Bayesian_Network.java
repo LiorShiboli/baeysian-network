@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class Bayesian_Network {
@@ -86,18 +85,26 @@ public class Bayesian_Network {
             }
             return CPTNodes.get(Query).getCPT().get(key);
         }
-        float QueryProbabilty=calculateProbability( givenVariables,Query,QueryOutcome,algorithm);
-        float totalProbabilitySum=QueryProbabilty;
+        float QueryProbability=calculateTotalProbability( givenVariables,Query,QueryOutcome,algorithm);
+        float totalProbabilitySum=QueryProbability;
+       // System.out.printf("%.9f", QueryProbability);
+        //System.out.println();
         for (String outcome : variableOutcomes.get(Query)) {
-            if(outcome!=QueryOutcome)
-            totalProbabilitySum+=calculateProbability( givenVariables,Query,outcome,algorithm);
+            if(!outcome.equals(QueryOutcome)){
+            Float outcomeProbability= calculateTotalProbability( givenVariables,Query,outcome,algorithm);
+            //System.out.printf("%.9f", outcomeProbability);
+           // System.out.println();
+            totalProbabilitySum+= outcomeProbability;
         }
-        probability=totalProbabilitySum/QueryProbabilty;
+            
+        }
+        probability=QueryProbability/totalProbabilitySum;
 
         return probability;
 
 }
-public float calculateProbability(HashMap<String,String> givenVariables,String Query,String QueryOutcome,int algorithm){
+public float calculateTotalProbability(HashMap<String,String> givenVariables,String Query,String QueryOutcome,int algorithm){
+    System.out.println("calculate probability");
     float probability=0;
     HashMap<String,String> variables=new HashMap<String,String>(givenVariables);
     variables.put(Query, QueryOutcome);
@@ -116,7 +123,7 @@ public float calculateProbability(HashMap<String,String> givenVariables,String Q
 }
 private float naiveCalculateProbability(HashMap<String, String> givenVariables) {
     float probability=0;
-    //find all ancestors of given variables
+    /*//find all ancestors of given variables
     Set<String> ancestorSet= new HashSet<String>(givenVariables.keySet());
     int size=0;
     while (size!=ancestorSet.size()) {
@@ -128,22 +135,34 @@ private float naiveCalculateProbability(HashMap<String, String> givenVariables) 
         }
         
     }
-
+    */
     HashMap<String,String[]> variableMap = new HashMap<String,String[]>(variableOutcomes);
-    variableMap.keySet().retainAll(ancestorSet);
     for (String variable : givenVariables.keySet()) {
+        //System.out.println(variable);
         variableMap.replace(variable, new  String[]{givenVariables.get(variable)});
     }
+    String[] order =variableMap.keySet().toArray(new String[variableMap.size()]);
     
-    permutation_iterator permutation= new permutation_iterator(variableMap,(String[])variableMap.keySet().toArray() );
-    while (permutation.hasNext()){
+    
+    permutation_iterator permutation= new permutation_iterator(variableMap, order );
+    for (int j = 0; j < order.length; j++) {
+        System.out.print(order[j]);
+    }
+    System.out.println();
+    
+     do{
         float permutationProbability=1;
         for (String variable: permutation.getVariables() ) {
             String key=permutation.getkey(CPTNodes.get(variable).getKeyOrder());
            permutationProbability*=CPTNodes.get(variable).getCPT().get(key);
         }
+        System.out.print( permutation.getPermutation()+"=");
+        System.out.printf("%.15f", permutationProbability);
+        System.out.println();
         probability+=permutationProbability;
-    }
+    }while(permutation.next());
+    System.out.printf("%.15f", probability);
+    System.out.println();
     
     return probability;
 }

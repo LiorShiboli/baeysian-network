@@ -1,6 +1,47 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.management.Query;
 
 public class EX1 {
     public static void main(String[] args) {
-        Bayesian_Network network= new Bayesian_Network("alarm_net.xml");
+        
+        BufferedReader reader;
+
+		try {
+			reader = new BufferedReader(new FileReader("input.txt"));
+			String line = reader.readLine();
+            Bayesian_Network network= new Bayesian_Network(line);
+            line=reader.readLine();
+			while (line != null) {
+				// read next line
+                int algorithm;
+                algorithm = Character.getNumericValue( line.charAt(line.length()-1));
+                Pattern variablePattern = Pattern.compile("([a-z A-Z\\d]*)=");
+                Pattern outcomePattern =  Pattern.compile("=([a-z A-Z\\d]*)");
+                Matcher variableMatcher = variablePattern.matcher(line);
+                Matcher outcomeMatcher = outcomePattern.matcher(line);
+                variableMatcher.find();
+                outcomeMatcher.find();
+                String Query = variableMatcher.group(1);
+                String QueryOutcome = outcomeMatcher.group(1);
+                HashMap<String,String> variableMap = new HashMap<String,String>();
+                while (variableMatcher.find()&&outcomeMatcher.find()) {
+                    variableMap.put(variableMatcher.group(1), outcomeMatcher.group(1));
+                }
+                float probability = network.Query(variableMap, Query, QueryOutcome, algorithm);
+                System.out.println(probability);
+				line = reader.readLine();
+
+			}
+
+			reader.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
     }
 }

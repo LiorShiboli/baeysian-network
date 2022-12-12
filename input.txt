@@ -1,0 +1,3 @@
+alarm_net.xml
+P(B=T|J=T,M=T),1
+P(J=T|B=T),1

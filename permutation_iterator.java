@@ -1,7 +1,7 @@
 import java.util.HashMap;
 import java.util.Iterator;
 
-public class permutation_iterator implements Iterator<Void> {
+public class permutation_iterator implements Iterator<Boolean> {
     private HashMap<String,String[]> variableOutcomes;
     private String[] variables;
     private HashMap<String,Integer> indexes;
@@ -38,16 +38,16 @@ public class permutation_iterator implements Iterator<Void> {
     }
 
     @Override
-    public Void next() {
+    public Boolean next() {
             int i=0;
             for ( i = 0; (i < variables.length)&&indexes.get(variables[i])==(variableOutcomes.get(variables[i]).length-1); i++) {
                 indexes.put(variables[i],0);
-            if(i==variables.length){
-                return null;
             }
+        if(i==variables.length){
+            return false;
+        }
         indexes.put(variables[i],indexes.get(variables[i])+1);
-    }
-        return null;
+        return true;
     }
  public String get_outcome(String variable){  
     return variableOutcomes.get(variable)[indexes.get(variable)];

@@ -66,7 +66,7 @@ public class CPTNode {
 
     @Override
     public String toString() {
-        return keyOrder[0];
+        return this.keyOrder[0];
     }
 
 
@@ -75,6 +75,6 @@ public class CPTNode {
 
 
     public String[] getKeyOrder() {
-        return null;
+        return this.keyOrder;
     }
 }
