@@ -6,8 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 public class CPTNode {
     //the variable to which the cpt belongs to and the parents(variables he depends on)
-    private String variable;
-    private String[] parents;
+    private String[] keyOrder;
     //conditional probability table based variable given its parents
     //keys are of the shape "<variable outcome>,<parents[0] outcome>,<parents[1] outcome>,..." and value contains the probability
     private HashMap<String,Float> CPT;
@@ -31,6 +30,7 @@ public class CPTNode {
         for (int i = 0; i < parents.length; i++) {
             order[i+1]=parents[i];
         }
+        this.keyOrder=order;
         HashMap<String, String[]> subMap = new HashMap<String, String[]>(variables);
         subMap.keySet().retainAll(Arrays.asList(parents));
         this.CPT= new HashMap<String,Float>();
@@ -40,9 +40,6 @@ public class CPTNode {
             
             this.CPT.put(itr.getPermutation(),Float.valueOf(table[i]));
         }
-         //assign parents and variable
-        this.parents=parents;
-        this.variable=variableName;
 
     }
 
@@ -56,26 +53,28 @@ public class CPTNode {
     }
 
     public String getVariable() {
-        return variable;
+        return keyOrder[0];
     }
 
     public String[] getParents() {
-        return parents;
+        return Arrays.copyOfRange(this.keyOrder, 1, this.keyOrder.length);
     }
 
     public void setCPT(HashMap<String, Float> CPT) {
         this.CPT = CPT;
     }
 
-    public void setParents(String[] parents) {
-        this.parents = parents;
-    }
-
-    public void setVariable(String variable) {
-        this.variable = variable;
-    }
     @Override
     public String toString() {
-        return this.variable;
+        return keyOrder[0];
+    }
+
+
+
+
+
+
+    public String[] getKeyOrder() {
+        return null;
     }
 }

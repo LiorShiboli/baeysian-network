@@ -15,6 +15,10 @@ public class permutation_iterator implements Iterator<Void> {
         }
         
     }
+    public String[] getVariables() {
+        return variables;
+    }
+
     public String getPermutation(){
         String permutation="";
             for (int j = 0; j < variables.length; j++) {
@@ -45,8 +49,14 @@ public class permutation_iterator implements Iterator<Void> {
     }
         return null;
     }
- public String get_outcome(String variable){
-    
+ public String get_outcome(String variable){  
     return variableOutcomes.get(variable)[indexes.get(variable)];
- }   
+ }
+public String getkey(String[] order) {
+    String key="";
+    for (int j = 0; j < order.length; j++) {
+        key = key.concat(this.get_outcome(order[j]));
+    }
+return key;
+}   
 }
