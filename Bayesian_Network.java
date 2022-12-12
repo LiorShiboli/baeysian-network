@@ -75,7 +75,7 @@ public class Bayesian_Network {
 
     }
     
-    public float Query(HashMap<String,String[]> givenVariables,String Query,String QueryOutcome,int algorithm){
+    public float Query(HashMap<String,String> givenVariables,String Query,String QueryOutcome,int algorithm){
         float probability=0;
         if (givenVariables.keySet().equals( new HashSet<>(Arrays.asList(CPTNodes.get(Query).getParents())))) {
             String key=QueryOutcome;
@@ -95,7 +95,7 @@ public class Bayesian_Network {
         return probability;
 
 }
-public float calculateProbability(HashMap<String,String[]> givenVariables,String Query,String QueryOutcome,int algorithm){
+public float calculateProbability(HashMap<String,String> givenVariables,String Query,String QueryOutcome,int algorithm){
     float probability=0;
     switch(algorithm) {
         case 1:
@@ -110,9 +110,20 @@ public float calculateProbability(HashMap<String,String[]> givenVariables,String
 
     return probability;
 }
-private float naiveCalculateProbability(HashMap<String, String[]> givenVariables, String query, String queryOutcome) {
-    float probability=0;
-    for
+private float naiveCalculateProbability(HashMap<String, String> givenVariables, String query, String queryOutcome) {
+    float probability=1;
+    HashMap<String,String[]> variableMap = new HashMap<String,String[]>(variableOutcomes);
+    for (String variable : givenVariables.keySet()) {
+        variableMap.replace(variable, new  String[]{givenVariables.get(variable)});
+    }
+    
+    permutation_iterator permutation= new permutation_iterator(variableMap,(String[])variableMap.keySet().toArray() );
+    while (permutation.hasNext()){
+        for (CPTNode cptNode : iterable) {
+            
+        }
+    }
+    
     return probability;
 }
 

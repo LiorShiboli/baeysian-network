@@ -1,20 +1,9 @@
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.stream.Collectors;
-import java.util.Map;
-import java.util.Set;
 public class CPTNode {
     //the variable to which the cpt belongs to and the parents(variables he depends on)
     private String variable;
@@ -26,7 +15,6 @@ public class CPTNode {
     public CPTNode(HashMap<String,String[]> variables, Element definition){
         //get variable
         String variableName= (String) definition.getElementsByTagName("FOR").item(0).getTextContent();
-
         //get the parents
 
         NodeList parentsList =definition.getElementsByTagName("GIVEN");
@@ -39,7 +27,7 @@ public class CPTNode {
        
         //
         String[] order=new String[parents.length+1];
-        order[0]=this.variable;
+        order[0]=variableName;
         for (int i = 0; i < parents.length; i++) {
             order[i+1]=parents[i];
         }
@@ -48,13 +36,9 @@ public class CPTNode {
         this.CPT= new HashMap<String,Float>();
         permutation_iterator itr= new permutation_iterator(variables, order);
         String[] table=definition.getElementsByTagName("TABLE").item(0).getTextContent().split(" ");
-        String[] permutation= itr.getPermutation();
-        for (int i = 0; i<table.length ; i++, permutation=itr.next()) {
-            String key="";
-            for (int j = 0; j < permutation.length; j++) {
-                key=key.concat(permutation[j]);
-            }
-            this.CPT.put(key,Float.valueOf(table[i]));
+        for (int i = 0; i<table.length ; i++, itr.next()) {
+            
+            this.CPT.put(itr.getPermutation(),Float.valueOf(table[i]));
         }
          //assign parents and variable
         this.parents=parents;
