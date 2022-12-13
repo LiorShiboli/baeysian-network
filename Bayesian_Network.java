@@ -10,6 +10,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -106,22 +107,36 @@ public class Bayesian_Network {
 public funcOutput calculateTotalProbability(HashMap<String,String> givenVariables,String Query,String QueryOutcome,int algorithm){
     HashMap<String,String> variables=new HashMap<String,String>(givenVariables);
     variables.put(Query, QueryOutcome);
-    
+    Comparator<CPTNode> byFactorSize= new Comparator<CPTNode>() {
+        @Override
+        public int compare(CPTNode o1, CPTNode o2) {
+            if (o1.getCPT().keySet().size()!=o2.getCPT().keySet().size()) {
+                return o1.getCPT().keySet().size()-o2.getCPT().keySet().size();
+                
+            }
+            return 0;
+        }
+    };
     switch(algorithm) {
         case 1:
           return naiveCalculateProbability(variables);
           
         case 2:
-          //probability = VECalculateProbabilty(variables);
-          break;
+          return VECalculateProbabilty(variables,byFactorSize);
+          
         case 3:
-          //probability = heuristicVECAlculateProbability(variables);
+          //return VECalculateProbabilty(variables,by<to be created>);
       }
       return null;
 
 }
+private funcOutput VECalculateProbabilty(HashMap<String, String> variables,Comparator<String> comparator) {
+    return null;
+}
+
 private funcOutput naiveCalculateProbability(HashMap<String, String> givenVariables) {
-    /*//find all ancestors of given variables
+    //System.out.println("calculate probability");
+    /* for 2nd function //find all ancestors of given variables
     Set<String> ancestorSet= new HashSet<String>(givenVariables.keySet());
     int size=0;
     while (size!=ancestorSet.size()) {
@@ -134,6 +149,7 @@ private funcOutput naiveCalculateProbability(HashMap<String, String> givenVariab
         
     }
     */
+    
     int additionOperations=0;
     int multOperations=0;
     funcOutput queryOutput= new funcOutput(0);
@@ -156,6 +172,7 @@ private funcOutput naiveCalculateProbability(HashMap<String, String> givenVariab
         multOperations++;
     }
      while (permutation.hasNext()) {
+        
         permutation.next();
         variable=permutation.getVariables()[0];
         key=permutation.getkey(CPTNodes.get(permutation.getVariables()[0]).getKeyOrder());
@@ -163,7 +180,7 @@ private funcOutput naiveCalculateProbability(HashMap<String, String> givenVariab
         for (int i = 1; i < permutation.getVariables().length; i++) {
             variable=permutation.getVariables()[i];
             key=permutation.getkey(CPTNodes.get(variable).getKeyOrder());
-            probability*=CPTNodes.get(variable).getCPT().get(key);
+            permutationProbability*=CPTNodes.get(variable).getCPT().get(key);
             multOperations++;
         }
         probability+=permutationProbability;
@@ -173,6 +190,11 @@ private funcOutput naiveCalculateProbability(HashMap<String, String> givenVariab
     
     return queryOutput.updateOutput(probability,multOperations,additionOperations);
 }
+
+
+
+
+
 
 
 }
