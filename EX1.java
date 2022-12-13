@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.management.Query;
+
 
 public class EX1 {
     public static void main(String[] args) {
@@ -33,8 +33,8 @@ public class EX1 {
                 while (variableMatcher.find()&&outcomeMatcher.find()) {
                     variableMap.put(variableMatcher.group(1), outcomeMatcher.group(1));
                 }
-                float probability = network.Query(variableMap, Query, QueryOutcome, algorithm);
-                System.out.println(probability);
+                funcOutput output = network.Query(variableMap, Query, QueryOutcome, algorithm);
+                System.out.println(output.getOutput()+","+output.getAdditionOperations()+","+output.getMultOperations());
 				line = reader.readLine();
 
 			}
