@@ -10,9 +10,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 public class Bayesian_Network {
     private HashMap<String,String[]> variableOutcomes;
@@ -76,7 +76,7 @@ public class Bayesian_Network {
 
     }
     
-    public funcOutput Query(HashMap<String,String> givenVariables,String Query,String QueryOutcome,int algorithm){
+    public funcOutput naiveQuery(HashMap<String,String> givenVariables,String Query,String QueryOutcome){
         if (givenVariables.keySet().equals( new HashSet<>(Arrays.asList(CPTNodes.get(Query).getParents())))) {
             String key=QueryOutcome;
             for (int i = 0; i < CPTNodes.get(Query).getParents().length; i++) {
@@ -86,12 +86,12 @@ public class Bayesian_Network {
         }
         
         
-        funcOutput totalProbabilitySum =calculateTotalProbability( givenVariables,Query,QueryOutcome,algorithm);
+        funcOutput totalProbabilitySum =naiveCalculatejointProbability( givenVariables,Query,QueryOutcome);
         float QueryProbability = totalProbabilitySum.getOutput();
         //System.out.println(totalProbabilitySum.getAdditionOperations()+","+totalProbabilitySum.getMultOperations());
         for (String outcome : variableOutcomes.get(Query)) {
             if(!outcome.equals(QueryOutcome)){
-            funcOutput outcomeProbability = calculateTotalProbability( givenVariables,Query,outcome,algorithm);
+            funcOutput outcomeProbability = naiveCalculatejointProbability( givenVariables,Query,outcome);
             //System.out.printf("%.9f", outcomeProbability);
            // System.out.println();
             totalProbabilitySum.add(outcomeProbability);
@@ -104,37 +104,26 @@ public class Bayesian_Network {
         return totalProbabilitySum;
 
 }
-public funcOutput calculateTotalProbability(HashMap<String,String> givenVariables,String Query,String QueryOutcome,int algorithm){
-    HashMap<String,String> variables=new HashMap<String,String>(givenVariables);
-    variables.put(Query, QueryOutcome);
-    Comparator<CPTNode> byFactorSize= new Comparator<CPTNode>() {
-        @Override
-        public int compare(CPTNode o1, CPTNode o2) {
-            if (o1.getCPT().keySet().size()!=o2.getCPT().keySet().size()) {
-                return o1.getCPT().keySet().size()-o2.getCPT().keySet().size();
-                
+    
+    
+public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, String Query,String  QueryOutcome) {
+    //find all ancestors of given variables
+    Set<String> ancestorSet= new HashSet<String>(givenVariables.keySet());
+    int size=0;
+    while (size!=ancestorSet.size()) {
+        size=ancestorSet.size();
+        for (String variable : ancestorSet) {
+            for (String parent : CPTNodes.get(variable).getParents()) {
+                ancestorSet.add(parent);
             }
-            return 0;
         }
-    };
-    switch(algorithm) {
-        case 1:
-          return naiveCalculateProbability(variables);
-          
-        case 2:
-          return VECalculateProbabilty(variables,byFactorSize);
-          
-        case 3:
-          //return VECalculateProbabilty(variables,by<to be created>);
-      }
-      return null;
-
-}
-private funcOutput VECalculateProbabilty(HashMap<String, String> variables,Comparator<String> comparator) {
+        
+    }
+    
     return null;
 }
 
-private funcOutput naiveCalculateProbability(HashMap<String, String> givenVariables) {
+private funcOutput naiveCalculatejointProbability(HashMap<String, String> givenVariables,String Query,String QueryOutcome) {
     //System.out.println("calculate probability");
     /* for 2nd function //find all ancestors of given variables
     Set<String> ancestorSet= new HashSet<String>(givenVariables.keySet());
@@ -149,7 +138,8 @@ private funcOutput naiveCalculateProbability(HashMap<String, String> givenVariab
         
     }
     */
-    
+    HashMap<String,String> variables=new HashMap<String,String>(givenVariables);
+    variables.put(Query, QueryOutcome);
     int additionOperations=0;
     int multOperations=0;
     funcOutput queryOutput= new funcOutput(0);

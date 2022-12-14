@@ -33,7 +33,14 @@ public class EX1 {
                 while (variableMatcher.find()&&outcomeMatcher.find()) {
                     variableMap.put(variableMatcher.group(1), outcomeMatcher.group(1));
                 }
-                funcOutput output = network.Query(variableMap, Query, QueryOutcome, algorithm);
+                funcOutput output;
+                if (algorithm==1) {
+                    
+                
+                output = network.naiveQuery(variableMap, Query, QueryOutcome);}
+                else{
+                    output= network.VECalculateProbabilty(variableMap, Query, QueryOutcome);
+                }
                 System.out.println(output.getOutput()+","+output.getAdditionOperations()+","+output.getMultOperations());
 				line = reader.readLine();
 
