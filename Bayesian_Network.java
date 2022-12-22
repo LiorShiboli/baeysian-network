@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 public class Bayesian_Network {
     private HashMap<String,String[]> variableOutcomes;
@@ -75,7 +76,7 @@ public class Bayesian_Network {
 
     }
     
-    public funcOutput Query(HashMap<String,String> givenVariables,String Query,String QueryOutcome,int algorithm){
+    public funcOutput naiveQuery(HashMap<String,String> givenVariables,String Query,String QueryOutcome){
         if (givenVariables.keySet().equals( new HashSet<>(Arrays.asList(CPTNodes.get(Query).getParents())))) {
             String key=QueryOutcome;
             for (int i = 0; i < CPTNodes.get(Query).getParents().length; i++) {
@@ -85,12 +86,12 @@ public class Bayesian_Network {
         }
         
         
-        funcOutput totalProbabilitySum =calculateTotalProbability( givenVariables,Query,QueryOutcome,algorithm);
+        funcOutput totalProbabilitySum =naiveCalculatejointProbability( givenVariables,Query,QueryOutcome);
         float QueryProbability = totalProbabilitySum.getOutput();
         //System.out.println(totalProbabilitySum.getAdditionOperations()+","+totalProbabilitySum.getMultOperations());
         for (String outcome : variableOutcomes.get(Query)) {
             if(!outcome.equals(QueryOutcome)){
-            funcOutput outcomeProbability = calculateTotalProbability( givenVariables,Query,outcome,algorithm);
+            funcOutput outcomeProbability = naiveCalculatejointProbability( givenVariables,Query,outcome);
             //System.out.printf("%.9f", outcomeProbability);
            // System.out.println();
             totalProbabilitySum.add(outcomeProbability);
@@ -103,25 +104,28 @@ public class Bayesian_Network {
         return totalProbabilitySum;
 
 }
-public funcOutput calculateTotalProbability(HashMap<String,String> givenVariables,String Query,String QueryOutcome,int algorithm){
-    HashMap<String,String> variables=new HashMap<String,String>(givenVariables);
-    variables.put(Query, QueryOutcome);
     
-    switch(algorithm) {
-        case 1:
-          return naiveCalculateProbability(variables);
-          
-        case 2:
-          //probability = VECalculateProbabilty(variables);
-          break;
-        case 3:
-          //probability = heuristicVECAlculateProbability(variables);
-      }
-      return null;
-
+    
+public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, String Query,String  QueryOutcome) {
+    //find all ancestors of given variables
+    Set<String> ancestorSet= new HashSet<String>(givenVariables.keySet());
+    int size=0;
+    while (size!=ancestorSet.size()) {
+        size=ancestorSet.size();
+        for (String variable : ancestorSet) {
+            for (String parent : CPTNodes.get(variable).getParents()) {
+                ancestorSet.add(parent);
+            }
+        }
+        
+    }
+    
+    return null;
 }
-private funcOutput naiveCalculateProbability(HashMap<String, String> givenVariables) {
-    /*//find all ancestors of given variables
+
+private funcOutput naiveCalculatejointProbability(HashMap<String, String> givenVariables,String Query,String QueryOutcome) {
+    //System.out.println("calculate probability");
+    /* for 2nd function //find all ancestors of given variables
     Set<String> ancestorSet= new HashSet<String>(givenVariables.keySet());
     int size=0;
     while (size!=ancestorSet.size()) {
@@ -134,6 +138,8 @@ private funcOutput naiveCalculateProbability(HashMap<String, String> givenVariab
         
     }
     */
+    HashMap<String,String> variables=new HashMap<String,String>(givenVariables);
+    variables.put(Query, QueryOutcome);
     int additionOperations=0;
     int multOperations=0;
     funcOutput queryOutput= new funcOutput(0);
@@ -156,6 +162,7 @@ private funcOutput naiveCalculateProbability(HashMap<String, String> givenVariab
         multOperations++;
     }
      while (permutation.hasNext()) {
+        
         permutation.next();
         variable=permutation.getVariables()[0];
         key=permutation.getkey(CPTNodes.get(permutation.getVariables()[0]).getKeyOrder());
@@ -163,7 +170,7 @@ private funcOutput naiveCalculateProbability(HashMap<String, String> givenVariab
         for (int i = 1; i < permutation.getVariables().length; i++) {
             variable=permutation.getVariables()[i];
             key=permutation.getkey(CPTNodes.get(variable).getKeyOrder());
-            probability*=CPTNodes.get(variable).getCPT().get(key);
+            permutationProbability*=CPTNodes.get(variable).getCPT().get(key);
             multOperations++;
         }
         probability+=permutationProbability;
@@ -173,6 +180,11 @@ private funcOutput naiveCalculateProbability(HashMap<String, String> givenVariab
     
     return queryOutput.updateOutput(probability,multOperations,additionOperations);
 }
+
+
+
+
+
 
 
 }
