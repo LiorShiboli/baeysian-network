@@ -37,15 +37,21 @@ public class CPTNode {
         permutation_iterator itr= new permutation_iterator(variables, order);
         String[] table=definition.getElementsByTagName("TABLE").item(0).getTextContent().split(" ");
         for (int i = 0; i<table.length ; i++, itr.next()) {
-            
             this.CPT.put(itr.getPermutation(),Float.valueOf(table[i]));
         }
 
     }
 
+    public CPTNode(CPTNode cptNode) {
+        this.CPT= new HashMap<>(cptNode.CPT);
+    }
 
 
 
+    public CPTNode(String[] order) {
+        this.keyOrder=order;
+        this.CPT =new HashMap<String,Float>();
+    }
 
 
     public HashMap<String, Float> getCPT() {
@@ -69,12 +75,10 @@ public class CPTNode {
         return this.keyOrder[0];
     }
 
-
-
-
-
-
     public String[] getKeyOrder() {
         return this.keyOrder;
+    }
+
+    public void eliminate(String given) {
     }
 }

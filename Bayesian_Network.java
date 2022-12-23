@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class Bayesian_Network {
@@ -88,11 +89,11 @@ public class Bayesian_Network {
         
         funcOutput totalProbabilitySum =naiveCalculatejointProbability( givenVariables,Query,QueryOutcome);
         float QueryProbability = totalProbabilitySum.getOutput();
-        //System.out.println(totalProbabilitySum.getAdditionOperations()+","+totalProbabilitySum.getMultOperations());
+        //System.out.println(totalProbabilitySum.getAdditionOperations()+","+totalProbabilitySum.getMultOperations() +","+totalProbabilitySum.getOutput());
         for (String outcome : variableOutcomes.get(Query)) {
             if(!outcome.equals(QueryOutcome)){
             funcOutput outcomeProbability = naiveCalculatejointProbability( givenVariables,Query,outcome);
-            //System.out.printf("%.9f", outcomeProbability);
+            //System.out.printf("%.9f", outcomeProbability.getOutput());
            // System.out.println();
             totalProbabilitySum.add(outcomeProbability);
             //System.out.println(outcomeProbability.getAdditionOperations()+","+outcomeProbability.getMultOperations());
@@ -107,9 +108,19 @@ public class Bayesian_Network {
     
     
 public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, String Query,String  QueryOutcome) {
+    //if  we can answer the query straight answer it
+    if (givenVariables.keySet().equals( new HashSet<>(Arrays.asList(CPTNodes.get(Query).getParents())))) {
+        String key=QueryOutcome;
+        for (int i = 0; i < CPTNodes.get(Query).getParents().length; i++) {
+            key+=givenVariables.get(CPTNodes.get(Query).getParents()[i]);
+        }
+        return new funcOutput(CPTNodes.get(Query).getCPT().get(key));
+    }
+    //initialize variables
     //find all ancestors of given variables
     Set<String> ancestorSet= new HashSet<String>(givenVariables.keySet());
     int size=0;
+    ancestorSet.add(Query);
     while (size!=ancestorSet.size()) {
         size=ancestorSet.size();
         for (String variable : ancestorSet) {
@@ -119,12 +130,41 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
         }
         
     }
+    ancestorSet.removeAll(givenVariables.keySet());
+    funcOutput probabilityOutput = new funcOutput(0);
+    Set<CPTNode> factorSet =new HashSet<>(); 
+    for (String variable :ancestorSet) {
+
+        //create
+        HashMap<String,String[]> variableMap = new HashMap<String,String[]>(variableOutcomes);
+        for (String given : givenVariables.keySet()) {
+            //System.out.println(variable);
+            variableMap.replace(given, new  String[]{givenVariables.get(given)});
+        }
+        String[] order = variableMap.keySet().toArray(new String[variableMap.size()]);
+        List<String> factorKeys = Arrays.asList(CPTNodes.get(variable).getKeyOrder());
+        factorKeys.removeAll(givenVariables.keySet());
+        CPTNode factor= new CPTNode((String[] )factorKeys.toArray());
+        permutation_iterator permutation = new permutation_iterator(variableMap, order );
+        factor.getCPT().put(permutation.getkey(factor.getKeyOrder()), CPTNodes.get(variable).getCPT().get(permutation.getkey(order)));
+
+        while (permutation.hasNext()) {
+            permutation.next();
+            factor.getCPT().put(permutation.getkey(factor.getKeyOrder()), CPTNodes.get(variable).getCPT().get(permutation.getkey(order)));
+
+        }
+        
+        factorSet.add(factor);
+            
+    }
+    ancestorSet.remove(Query);
+    Set<String> hiddenVariableSet = ancestorSet;
     
     return null;
 }
 
 private funcOutput naiveCalculatejointProbability(HashMap<String, String> givenVariables,String Query,String QueryOutcome) {
-    //System.out.println("calculate probability");
+    //System.out.println("calculate joint probability");
     /* for 2nd function //find all ancestors of given variables
     Set<String> ancestorSet= new HashSet<String>(givenVariables.keySet());
     int size=0;
@@ -138,15 +178,18 @@ private funcOutput naiveCalculatejointProbability(HashMap<String, String> givenV
         
     }
     */
+    //start all the data we need
     HashMap<String,String> variables=new HashMap<String,String>(givenVariables);
     variables.put(Query, QueryOutcome);
     int additionOperations=0;
     int multOperations=0;
     funcOutput queryOutput= new funcOutput(0);
+
+
     HashMap<String,String[]> variableMap = new HashMap<String,String[]>(variableOutcomes);
-    for (String variable : givenVariables.keySet()) {
+    for (String variable : variables.keySet()) {
         //System.out.println(variable);
-        variableMap.replace(variable, new  String[]{givenVariables.get(variable)});
+        variableMap.replace(variable, new  String[]{variables.get(variable)});
     }
     String[] order =variableMap.keySet().toArray(new String[variableMap.size()]);
     
@@ -157,10 +200,14 @@ private funcOutput naiveCalculatejointProbability(HashMap<String, String> givenV
     float probability=CPTNodes.get(variable).getCPT().get(key);
     for (int i = 1; i < permutation.getVariables().length; i++) {
         variable=permutation.getVariables()[i];
+        
         key=permutation.getkey(CPTNodes.get(variable).getKeyOrder());
+        //System.out.println(key);
         probability*=CPTNodes.get(variable).getCPT().get(key);
         multOperations++;
     }
+    //System.out.println();
+    //System.out.println(permutation.getPermutation());
      while (permutation.hasNext()) {
         
         permutation.next();
@@ -170,9 +217,12 @@ private funcOutput naiveCalculatejointProbability(HashMap<String, String> givenV
         for (int i = 1; i < permutation.getVariables().length; i++) {
             variable=permutation.getVariables()[i];
             key=permutation.getkey(CPTNodes.get(variable).getKeyOrder());
+            //System.out.print(key+",");
             permutationProbability*=CPTNodes.get(variable).getCPT().get(key);
             multOperations++;
         }
+        //System.out.println();
+        //System.out.println(permutation.getPermutation());
         probability+=permutationProbability;
         additionOperations++;
     }

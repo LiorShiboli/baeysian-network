@@ -41,6 +41,7 @@ public class EX1 {
                 else{
                     output= network.VECalculateProbabilty(variableMap, Query, QueryOutcome);
                 }
+                System.out.println(line);
                 System.out.println(output.getOutput()+","+output.getAdditionOperations()+","+output.getMultOperations());
 				line = reader.readLine();
 
