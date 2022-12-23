@@ -81,4 +81,8 @@ public class CPTNode {
 
     public void eliminate(String given) {
     }
+
+    public CPTNode join(CPTNode cptNode) {
+        return null;
+    }
 }

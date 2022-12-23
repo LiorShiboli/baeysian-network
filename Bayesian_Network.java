@@ -9,7 +9,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -133,10 +135,12 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
     ancestorSet.removeAll(givenVariables.keySet());
     funcOutput probabilityOutput = new funcOutput(0);
     Set<CPTNode> factorSet =new HashSet<>(); 
+    //create factors
     for (String variable :ancestorSet) {
 
-        //create
+        //create factor
         HashMap<String,String[]> variableMap = new HashMap<String,String[]>(variableOutcomes);
+        variableMap.keySet().retainAll(Arrays.asList(CPTNodes.get(variable).getKeyOrder()));
         for (String given : givenVariables.keySet()) {
             //System.out.println(variable);
             variableMap.replace(given, new  String[]{givenVariables.get(given)});
@@ -159,7 +163,32 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
     }
     ancestorSet.remove(Query);
     Set<String> hiddenVariableSet = ancestorSet;
-    
+    while (!hiddenVariableSet.isEmpty()) {
+        String variable = choose(hiddenVariableSet,factorSet);
+        ArrayList<CPTNode> joinList = new ArrayList<CPTNode>();
+        //get all the factors we want to join
+        for (CPTNode factor : factorSet) {
+            if (Arrays.asList( factor.getKeyOrder()).contains(variable)) {
+                joinList.add(factor);
+            }
+        }
+        
+        joinList.sort(new Comparator<CPTNode>() {
+            public int compare(CPTNode node1,CPTNode node2){
+                if (node1.getCPT().size()!=node2.getCPT().size()){
+                    return node1.getCPT().size() - node2.getCPT().size();
+                }
+            }
+        });
+
+        CPTNode newfactor = joinList.get(0);
+        for (int i = 1; i < joinList.size(); i++) {
+            newfactor = newfactor.join(joinList.get(i));
+        }
+        newfactor.eliminate(variable);
+        factorSet.removeAll(joinList);
+        factorSet.add(newfactor);
+    }
     return null;
 }
 
@@ -230,12 +259,6 @@ private funcOutput naiveCalculatejointProbability(HashMap<String, String> givenV
     
     return queryOutput.updateOutput(probability,multOperations,additionOperations);
 }
-
-
-
-
-
-
 
 }
 
