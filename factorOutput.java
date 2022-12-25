@@ -35,6 +35,8 @@ public class factorOutput {
         }
         this.table=newTable;
     }
+
+    
     public void eliminate(String variable, HashMap<String, String[]> variableOutcomes) {
         CPTNode factor = this.table;
         String[] newKeys = new String[factor.getKeyOrder().length - 1];
@@ -51,8 +53,16 @@ public class factorOutput {
         newTable.getCPT().put(itr.getkey(newKeys), factor.getCPT().get(itr.getkey(factor.getKeyOrder())));
         while (itr.hasNext()) {
             itr.next();
-            if(newTable.getCPT().get()){
-            addOperations++;
+            String newKey = itr.getkey(newKeys);
+            String oldKey = itr.getkey(factor.getKeyOrder());
+
+            if(newTable.getCPT().containsKey(newKey)){
+                newTable.getCPT().replace(newKey, newTable.getCPT().get(newKey)+factor.getCPT().get(oldKey));
+                addOperations++;
+            }
+            
+            else{
+                newTable.getCPT().put(newKey, factor.getCPT().get(oldKey));
             }
         }
         
