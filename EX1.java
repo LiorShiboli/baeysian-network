@@ -39,7 +39,7 @@ public class EX1 {
                 
                 output = network.naiveQuery(variableMap, Query, QueryOutcome);}
                 else{
-                    output= network.VECalculateProbabilty(variableMap, Query, QueryOutcome);
+                    output= network.VECalculateProbabilty(variableMap, Query, QueryOutcome,algorithm);
                 }
                 System.out.println(line);
                 System.out.println(output.getOutput()+","+output.getAdditionOperations()+","+output.getMultOperations());

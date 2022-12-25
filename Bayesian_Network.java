@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -109,7 +110,7 @@ public class Bayesian_Network {
 }
     
     
-public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, String Query,String  QueryOutcome) {
+public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, String Query,String  QueryOutcome,int algorithm) {
     //if  we can answer the query straight answer it
     if (givenVariables.keySet().equals( new HashSet<>(Arrays.asList(CPTNodes.get(Query).getParents())))) {
         String key=QueryOutcome;
@@ -118,7 +119,10 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
         }
         return new funcOutput(CPTNodes.get(Query).getCPT().get(key));
     }
+
+
     //initialize variables
+    funcOutput probabilityOutput = new funcOutput(0);
     //find all ancestors of given variables
     Set<String> ancestorSet= new HashSet<String>(givenVariables.keySet());
     int size=0;
@@ -132,9 +136,13 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
         }
         
     }
+
+
     ancestorSet.removeAll(givenVariables.keySet());
-    funcOutput probabilityOutput = new funcOutput(0);
-    Set<CPTNode> factorSet =new HashSet<>(); 
+    
+
+
+    Set<factorOutput> factorSet =new HashSet<>(); 
     //create factors
     for (String variable :ancestorSet) {
 
@@ -158,38 +166,74 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
 
         }
         
-        factorSet.add(factor);
+        factorOutput newFactor=new factorOutput(factor);
+        factorSet.add(newFactor);
             
     }
+
+
     ancestorSet.remove(Query);
     Set<String> hiddenVariableSet = ancestorSet;
+
+    //variable elimination
     while (!hiddenVariableSet.isEmpty()) {
-        String variable = choose(hiddenVariableSet,factorSet);
-        ArrayList<CPTNode> joinList = new ArrayList<CPTNode>();
+        String variable = choose(hiddenVariableSet,factorSet,algorithm);
+        ArrayList<factorOutput> joinList = new ArrayList<factorOutput>();
         //get all the factors we want to join
-        for (CPTNode factor : factorSet) {
-            if (Arrays.asList( factor.getKeyOrder()).contains(variable)) {
+        for (factorOutput factor : factorSet) {
+            if (Arrays.asList( factor.getTable().getKeyOrder()).contains(variable)) {
                 joinList.add(factor);
             }
         }
         
-        joinList.sort(new Comparator<CPTNode>() {
-            public int compare(CPTNode node1,CPTNode node2){
+        joinList.sort(new Comparator<factorOutput>() {
+            public int compare(factorOutput factor1,factorOutput factor2){
+                CPTNode node1 =factor1.getTable();
+                CPTNode node2 =factor2.getTable();
                 if (node1.getCPT().size()!=node2.getCPT().size()){
                     return node1.getCPT().size() - node2.getCPT().size();
                 }
+                //else ASCII sum
+                int node1Sum=0;
+                for (String variable: node1.getKeyOrder()) {
+                    for (int i = 0; i < variable.length(); i++) {
+                        node1Sum+=variable.charAt(i);
+                    }
+                }
+                int node2Sum=0;
+                for (String variable: node2 .getKeyOrder()) {
+                    for (int i = 0; i < variable.length(); i++) {
+                        node2Sum+=variable.charAt(i);
+                    }
+                }
+                return node1Sum-node2Sum;
             }
         });
 
-        CPTNode newfactor = joinList.get(0);
+        factorOutput newfactor = joinList.get(0);
         for (int i = 1; i < joinList.size(); i++) {
-            newfactor = newfactor.join(joinList.get(i));
+            newfactor.join(joinList.get(i),variableOutcomes);
         }
-        newfactor.eliminate(variable);
+        newfactor.eliminate(variable,this.variableOutcomes);
         factorSet.removeAll(joinList);
-        factorSet.add(newfactor);
+        if (newfactor.getTable().getCPT().size()!=1) {
+            factorSet.add(newfactor);
+        }
+       
     }
     return null;
+}
+
+private String choose(Set<String> hiddenVariableSet, Set<factorOutput> factorSet, int algorithm) {
+    switch (algorithm) {
+        case 2:
+            return Collections.min(hiddenVariableSet);
+            
+        case 3:
+            
+        default:
+        return Collections.min(hiddenVariableSet);
+    }
 }
 
 private funcOutput naiveCalculatejointProbability(HashMap<String, String> givenVariables,String Query,String QueryOutcome) {
