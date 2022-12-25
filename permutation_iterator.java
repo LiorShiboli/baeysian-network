@@ -22,7 +22,7 @@ public class permutation_iterator implements Iterator<Boolean> {
     public String getPermutation(){
         String permutation="";
             for (int j = 0; j < variables.length; j++) {
-                permutation = permutation.concat(this.get_outcome(variables[j]));
+                permutation = permutation.concat(this.get_outcome(variables[j])+",");
             }
         return permutation;
 
@@ -55,7 +55,7 @@ public class permutation_iterator implements Iterator<Boolean> {
 public String getkey(String[] order) {
     String key="";
     for (int j = 0; j < order.length; j++) {
-        key = key.concat(this.get_outcome(order[j]));
+        key = key.concat(this.get_outcome(order[j])+",");
     }
 return key;
 }   
