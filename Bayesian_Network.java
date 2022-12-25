@@ -9,6 +9,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,6 +17,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
 
 public class Bayesian_Network {
@@ -125,16 +127,16 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
     funcOutput probabilityOutput = new funcOutput(0);
     //find all ancestors of given variables
     Set<String> ancestorSet= new HashSet<String>(givenVariables.keySet());
-    int size=0;
     ancestorSet.add(Query);
-    while (size!=ancestorSet.size()) {
-        size=ancestorSet.size();
-        for (String variable : ancestorSet) {
-            for (String parent : CPTNodes.get(variable).getParents()) {
-                ancestorSet.add(parent);
-            }
-        }
-        
+
+    //run BFS to discover all nodes 
+    Queue<String> queue = new ArrayDeque<String>(ancestorSet);
+    String currentVariable;
+    while (!queue.isEmpty()) {
+        currentVariable = queue.remove();
+        ancestorSet.add(currentVariable);
+        queue.addAll(Arrays.asList(CPTNodes.get(currentVariable).getParents()));
+        queue.removeAll(ancestorSet);
     }
 
 
