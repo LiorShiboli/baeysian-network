@@ -221,6 +221,8 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
         }
        
     }
+    
+    
     return null;
 }
 
