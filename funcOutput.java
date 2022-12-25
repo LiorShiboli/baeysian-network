@@ -12,18 +12,17 @@ public class funcOutput {
         this.output=0;
         
     }
-    public funcOutput updateOutput(float output,int multOperations,int additionOperations){
+    public void updateOutput(float output,int multOperations,int additionOperations){
         this.additionOperations+= additionOperations;
         this.multOperations+=multOperations;
         this.output=output;
-        return this;
+        
         
     }
-    public funcOutput updaOutput(funcOutput updated){
+    public void updateOutput(funcOutput updated){
         this.additionOperations+=updated.additionOperations;
         this.multOperations += updated.multOperations;
         this.output=updated.output;
-        return this;
 
     }
 
@@ -41,6 +40,10 @@ public class funcOutput {
         this.additionOperations+= addedOutput.additionOperations+1;
         this.multOperations+= addedOutput.multOperations;
         this.output+= addedOutput.output;
+    }
+    public void add(float output) {
+        this.additionOperations++;
+        this.output+= output;
     }
     
 }

@@ -40,12 +40,13 @@ public class factorOutput {
     public void eliminate(String variable, HashMap<String, String[]> variableOutcomes) {
         CPTNode factor = this.table;
         String[] newKeys = new String[factor.getKeyOrder().length - 1];
-
+       
         int j=0;
         for (int i = 0; i < factor.getKeyOrder().length ; i++) {
-            if (variable!=factor.getKeyOrder()[i]){
+            
+            if (variable != factor.getKeyOrder()[i]){
             newKeys[j] = factor.getKeyOrder()[i];
-            i++;
+            j++;
             }
         }
         CPTNode newTable = new CPTNode(newKeys);
