@@ -22,7 +22,7 @@ public class factorOutput {
         String[] keys2 = toJoinFactor.getTable().getKeyOrder();
         Set<String> keySet = Arrays.stream(keys1).collect(Collectors.toSet());
         keySet.addAll(Arrays.stream(keys2).collect(Collectors.toSet()));
-        String[] keyorder = (String[])keySet.toArray();
+        String[] keyorder = keySet.toArray(new String[keySet.size()]);
         CPTNode newTable = new CPTNode(keyorder);
         permutation_iterator itr = new permutation_iterator(variableOutcomes,keyorder);
         newTable.getCPT().put(itr.getkey(keyorder),factor1.get(itr.getkey(keys1))*factor2.get(itr.getkey(keys2)) );
@@ -44,7 +44,7 @@ public class factorOutput {
         int j=0;
         for (int i = 0; i < factor.getKeyOrder().length ; i++) {
             
-            if (variable != factor.getKeyOrder()[i]){
+            if (!variable.equals(factor.getKeyOrder()[i])){
             newKeys[j] = factor.getKeyOrder()[i];
             j++;
             }

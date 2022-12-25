@@ -154,7 +154,7 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
 
         String[] order = variableMap.keySet().toArray(new String[variableMap.size()]);
         List<String> factorKeys = Arrays.asList(CPTNodes.get(variable).getKeyOrder());
-
+        
         factorKeys.removeAll(givenVariables.keySet());
 
         CPTNode factor= new CPTNode(factorKeys.stream().toArray(String[]::new));
@@ -185,6 +185,7 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
     //cruelly eliminate that variable from that factor
     while (!hiddenVariableSet.isEmpty()) {
         String variable = choose(hiddenVariableSet,factorSet,algorithm);
+        hiddenVariableSet.remove(variable);
         System.out.println("eliminate" + variable);
         ArrayList<factorOutput> joinList = new ArrayList<factorOutput>();
         //get all the factors we want to join
