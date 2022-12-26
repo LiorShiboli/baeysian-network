@@ -50,10 +50,10 @@ public class factorOutput {
 
 
     public void eliminate(String variable, HashMap<String, String[]> variableOutcomes) {
-        //System.out.println("eliminate "+variable);
+        
         CPTNode factor = this.table;
         String[] newKeys = new String[factor.getKeyOrder().length - 1];
-        //System.out.println(factor.getCPT()+" "+ Arrays.toString(factor.getKeyOrder()));
+        
         int j=0;
         for (int i = 0; i < factor.getKeyOrder().length ; i++) {
             

@@ -1,15 +1,19 @@
 import java.util.HashMap;
 import java.util.Iterator;
-//this is t
+//this is one of the more important classes
+//this class gets variables to iterate over their permutation(ie and iterates over them in order of the variables given 
+//is also able to get keys to the given permutation in a specfic CPT given the key order!
+//this is really important as it lets us communicate between CPTs
 public class permutation_iterator implements Iterator<Boolean> {
     private HashMap<String,String[]> variableOutcomes;
     private String[] variables;
     private HashMap<String,Integer> indexes;
+
     public permutation_iterator(HashMap<String,String[]> variableOutcomes,String[] variables ){
         this.variableOutcomes=variableOutcomes;
         this.variables=variables;
         indexes= new HashMap<String,Integer>();
-        
+        //start the permutation at the first outcome of each variable
         for (String variable : variables) {
             indexes.put(variable, 0);
         }
@@ -18,7 +22,7 @@ public class permutation_iterator implements Iterator<Boolean> {
     public String[] getVariables() {
         return variables;
     }
-
+    //like get key but by the order given
     public String getPermutation(){
         String permutation="";
             for (int j = 0; j < variables.length; j++) {
@@ -36,23 +40,25 @@ public class permutation_iterator implements Iterator<Boolean> {
         }
         return false;
     }
-
+    //get to the next permutation, moves to the next outcome for the first variable,if completes a cycle do the same for the second
     @Override
     public Boolean next() {
             int i=0;
-            for ( i = 0; (i < variables.length)&&indexes.get(variables[i])==(variableOutcomes.get(variables[i]).length-1); i++) {
+            for ( i = 0; (i < variables.length) && indexes.get(variables[i]) == (variableOutcomes.get(variables[i]).length-1); i++) {
                 indexes.put(variables[i],0);
             }
-        if(i==variables.length){
+        if(i == variables.length){
             return false;
         }
         indexes.put(variables[i],indexes.get(variables[i])+1);
         return true;
     }
- public String get_outcome(String variable){  
+
+    public String get_outcome(String variable){  
     return variableOutcomes.get(variable)[indexes.get(variable)];
- }
-public String getkey(String[] order) {
+    }
+    //get key for permutation the key order (doesnt have to contain all the variables)
+    public String getkey(String[] order) {
     String key="";
     for (int j = 0; j < order.length; j++) {
         key = key.concat(this.get_outcome(order[j])+",");

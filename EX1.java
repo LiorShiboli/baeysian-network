@@ -24,6 +24,9 @@ public class Ex1 {
 				// read next line
                 int algorithm;
                 algorithm = Character.getNumericValue( line.charAt(line.length()-1));
+                //looks like a lot,is a bunch of regex to figure out the variables outcomes and query,
+                //assumes only one query that comes first and that every variable is comprised of only letters and numbers,
+                //could be a problem with spaces,is easily fixable
                 Pattern variablePattern = Pattern.compile("([a-z A-Z\\d]*)=");
                 Pattern outcomePattern =  Pattern.compile("=([a-z A-Z\\d]*)");
                 Matcher variableMatcher = variablePattern.matcher(line);
@@ -36,6 +39,7 @@ public class Ex1 {
                 while (variableMatcher.find()&&outcomeMatcher.find()) {
                     variableMap.put(variableMatcher.group(1), outcomeMatcher.group(1));
                 }
+                //calculate probability using defined algorithm
                 funcOutput output;
                 if (algorithm==1) {
                     
