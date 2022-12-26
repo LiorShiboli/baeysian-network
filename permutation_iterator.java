@@ -1,6 +1,6 @@
 import java.util.HashMap;
 import java.util.Iterator;
-
+//this is t
 public class permutation_iterator implements Iterator<Boolean> {
     private HashMap<String,String[]> variableOutcomes;
     private String[] variables;

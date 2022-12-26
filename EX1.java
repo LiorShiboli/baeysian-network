@@ -1,5 +1,7 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.regex.Matcher;
@@ -7,12 +9,13 @@ import java.util.regex.Pattern;
 
 
 
-public class EX1 {
+public class Ex1 {
     public static void main(String[] args) {
         
         BufferedReader reader;
 
 		try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter("output.txt", true));
 			reader = new BufferedReader(new FileReader("input.txt"));
 			String line = reader.readLine();
             Bayesian_Network network= new Bayesian_Network(line);
@@ -41,12 +44,13 @@ public class EX1 {
                 else{
                     output= network.VECalculateProbabilty(variableMap, Query, QueryOutcome,algorithm);
                 }
-                System.out.println(line);
-                System.out.println(output.getOutput()+","+output.getAdditionOperations()+","+output.getMultOperations());
+                
+                String outputLine = output.getOutput()+","+output.getAdditionOperations()+","+output.getMultOperations()+"\n";
+                writer.append(outputLine);
 				line = reader.readLine();
 
 			}
-
+            writer.close();
 			reader.close();
 		} catch (IOException e) {
 			e.printStackTrace();
