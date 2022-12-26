@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
@@ -137,13 +136,12 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
     }
 
   
-    ancestorSet.removeAll(givenVariables.keySet());
 
 
     Set<factorOutput> factorSet = new HashSet<>(); 
     //create factors
     for (String variable :ancestorSet) {
-
+        CPTNode node = CPTNodes.get(variable);
         //create factor
         HashMap<String,String[]> variableMap = new HashMap<String,String[]>(variableOutcomes);
         variableMap.keySet().retainAll(Arrays.asList(CPTNodes.get(variable).getKeyOrder()));
@@ -160,20 +158,24 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
         permutation_iterator permutation = new permutation_iterator(variableMap, order );
         //tricky bit of code to write concisely,
         //puts the variable into the factor but without the unnecessary variables(those that are given)
-        factor.getCPT().put(permutation.getkey(factor.getKeyOrder()), CPTNodes.get(variable).getCPT().get(permutation.getkey(order)));
+        factor.getCPT().put(permutation.getkey(factor.getKeyOrder()), node.getCPT().get(permutation.getkey(node.getKeyOrder())));
 
         while (permutation.hasNext()) {
             permutation.next();
-            factor.getCPT().put(permutation.getkey(factor.getKeyOrder()), CPTNodes.get(variable).getCPT().get(permutation.getkey(order)));
+            
+            factor.getCPT().put(permutation.getkey(factor.getKeyOrder()), node.getCPT().get(permutation.getkey(node.getKeyOrder())));
 
         }
         
         factorOutput newFactor=new factorOutput(factor);
+        if(newFactor.getTable().getCPT().size()!=1){
         factorSet.add(newFactor);
+        }
             
     }
 
     ancestorSet.remove(Query);
+    ancestorSet.removeAll(givenVariables.keySet());
     Set<String> hiddenVariableSet = ancestorSet;
     factorOutput newfactor = null;
     
@@ -182,8 +184,8 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
     //choose a variable(either by the method specified on the algorithm)
     //join all of the variables containing it into one factor
     //cruelly eliminate that variable from that factor
-    
     while (!hiddenVariableSet.isEmpty()) {
+        //System.out.println(factorSet);
         //System.out.println(hiddenVariableSet);
         String variable = choose(hiddenVariableSet,factorSet,algorithm);
         hiddenVariableSet.remove(variable);
@@ -195,6 +197,7 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
                 joinList.add(factor);
             }
         }
+        //System.out.println("factor set = "+ factorSet+" joinlist = "+joinList);
         factorSet.removeAll(joinList);
         //just sorting by the order we want to join
         joinList.sort(new Comparator<factorOutput>() {
@@ -238,17 +241,17 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
        
     }
     // if we did our job right we should have only one factor in the factor set
-    factorOutput finalFactor=null;
-    for (factorOutput factor : factorSet) {
-       finalFactor = factor;
-    }
+    factorOutput[] finalJoinList = factorSet.toArray(new factorOutput[factorSet.size()]);
+    factorOutput finalFactor = finalJoinList[0];
+    for (int i = 1; i < finalJoinList.length; i++) {
+        finalFactor.join(finalJoinList[i], variableOutcomes);
+    } 
 
     //that's a weird thing to do but it keeps permutation iterator as the only one handling keys, which is helpful
     float nonNormalizedProbability=0;
     permutation_iterator itr = new permutation_iterator(variableOutcomes, new  String[]{Query} );
     //System.out.println(finalFactor.table.getKeyOrder()[0]);
     //System.out.println(Arrays.toString(finalFactor.table.getKeyOrder())+" "+Query);
-    System.out.println(finalFactor.table.getCPT());
     String key = itr.getkey(finalFactor.table.getKeyOrder());
     
     float Probability = finalFactor.table.getCPT().get(key);

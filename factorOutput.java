@@ -14,19 +14,21 @@ public class factorOutput {
         this.table=factor;
     }
     public void join(factorOutput toJoinFactor,HashMap<String, String[]> variableOutcomes) {
-        System.out.println("join");
+        //System.out.println("join");
         multOperations+=toJoinFactor.multOperations;
-        addOperations+=toJoinFactor.multOperations;
+        addOperations+=toJoinFactor.addOperations;
         HashMap<String, Float> factor1 = this.getTable().getCPT();
         HashMap<String, Float> factor2 = toJoinFactor.getTable().getCPT();
         
 
         String[] keys1= this.getTable().getKeyOrder();
         String[] keys2 = toJoinFactor.getTable().getKeyOrder();
-        /*System.out.println(Arrays.toString(keys1));
-        System.out.println(factor1);
-        System.out.println(Arrays.toString(keys2));
-        System.out.println(factor2);*/
+        
+        //System.out.println(Arrays.toString(keys1));
+        //System.out.println(factor1);
+        //System.out.println(Arrays.toString(keys2));
+        //System.out.println(factor2);
+        
         Set<String> keySet = Arrays.stream(keys1).collect(Collectors.toSet());
         keySet.addAll(Arrays.stream(keys2).collect(Collectors.toSet()));
         String[] keyorder = keySet.toArray(new String[keySet.size()]);
@@ -48,9 +50,10 @@ public class factorOutput {
 
 
     public void eliminate(String variable, HashMap<String, String[]> variableOutcomes) {
+        //System.out.println("eliminate "+variable);
         CPTNode factor = this.table;
         String[] newKeys = new String[factor.getKeyOrder().length - 1];
-       
+        //System.out.println(factor.getCPT()+" "+ Arrays.toString(factor.getKeyOrder()));
         int j=0;
         for (int i = 0; i < factor.getKeyOrder().length ; i++) {
             
@@ -79,7 +82,7 @@ public class factorOutput {
             
         }
      this.table=newTable;
-
+    //System.out.println(this.table.getCPT());
     }
 
 
