@@ -187,7 +187,7 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
     while (!hiddenVariableSet.isEmpty()) {
         //System.out.println(factorSet);
         //System.out.println(hiddenVariableSet);
-        String variable = choose(hiddenVariableSet,factorSet,algorithm);
+        String variable = choose(hiddenVariableSet,factorSet,variableOutcomes, algorithm);
         hiddenVariableSet.remove(variable);
         
         ArrayList<factorOutput> joinList = new ArrayList<factorOutput>();
@@ -240,7 +240,7 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
         
        
     }
-    // if we did our job right we should have only one factor in the factor set
+    // now we are left with one variable(our query) left on all factors and we need only to join and normalize
     factorOutput[] finalJoinList = factorSet.toArray(new factorOutput[factorSet.size()]);
     factorOutput finalFactor = finalJoinList[0];
     for (int i = 1; i < finalJoinList.length; i++) {
@@ -250,10 +250,9 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
     //that's a weird thing to do but it keeps permutation iterator as the only one handling keys, which is helpful
     float nonNormalizedProbability=0;
     permutation_iterator itr = new permutation_iterator(variableOutcomes, new  String[]{Query} );
-    //System.out.println(finalFactor.table.getKeyOrder()[0]);
-    //System.out.println(Arrays.toString(finalFactor.table.getKeyOrder())+" "+Query);
+
+    //we now sum all the probabilities in our factor for the normaliztion component, and keep the one with the outcome we want 
     String key = itr.getkey(finalFactor.table.getKeyOrder());
-    
     float Probability = finalFactor.table.getCPT().get(key);
     if  (itr.get_outcome(Query).equals(QueryOutcome)){
         
@@ -270,17 +269,49 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
         }
         probabilityOutput.add(Probability);
     }
+    //finally normalize the probabilty and update the multiplication and addition operations\
+    //(this will add to the multiplication and additon we have already done on the output) 
     probabilityOutput.updateOutput(nonNormalizedProbability/probabilityOutput.getOutput(), finalFactor.multOperations,finalFactor.addOperations );
     return probabilityOutput;
 }
 
-private String choose(Set<String> hiddenVariableSet, Set<factorOutput> factorSet, int algorithm) {
+private String choose(Set<String> hiddenVariableSet, Set<factorOutput> factorSet, HashMap<String,String[]> variableOutcomes,int algorithm) {
     switch (algorithm) {
         case 2:
+        //order by lexicographic order on the variables,each time choose the smallest by that order
             return Collections.min(hiddenVariableSet);
             
         case 3:
-            
+            //order by "minimum degree" ie create the smallest factor
+
+            return Collections.min(hiddenVariableSet,new Comparator<String>() {
+                private Set<factorOutput> NodeSet = factorSet;
+                @Override
+                public int compare(String variable1, String variable2) {
+                    Set<String> joinedVariables1 = new HashSet<String>();
+                    Set<String> joinedVariables2 = new HashSet<String>();
+                    //get all the variables in the final factors  
+                    for (factorOutput factor : NodeSet) {
+                        if (Arrays.asList( factor.getTable().getKeyOrder()).contains(variable1)) {
+                            joinedVariables1.addAll(Arrays.asList(factor.getTable().getKeyOrder()));
+                        }
+                        if (Arrays.asList( factor.getTable().getKeyOrder()).contains(variable2)) {
+                            joinedVariables2.addAll(Arrays.asList(factor.getTable().getKeyOrder()));
+                        }
+
+                    }
+                    int joinedFactorSize1 = 1;
+                    int joinedFactorSize2 = 1;
+                    for (String variable : joinedVariables1) {
+                        joinedFactorSize1 *= variableOutcomes.get(variable).length ;
+                    }
+                    for (String variable : joinedVariables2) {
+                        joinedFactorSize2 *= variableOutcomes.get(variable).length ;
+                    }
+                    
+                    return joinedFactorSize1- joinedFactorSize2;
+                }
+            });
         default:
         return Collections.min(hiddenVariableSet);
     }
