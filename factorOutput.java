@@ -14,12 +14,19 @@ public class factorOutput {
         this.table=factor;
     }
     public void join(factorOutput toJoinFactor,HashMap<String, String[]> variableOutcomes) {
+        System.out.println("join");
         multOperations+=toJoinFactor.multOperations;
         addOperations+=toJoinFactor.multOperations;
         HashMap<String, Float> factor1 = this.getTable().getCPT();
         HashMap<String, Float> factor2 = toJoinFactor.getTable().getCPT();
+        
+
         String[] keys1= this.getTable().getKeyOrder();
         String[] keys2 = toJoinFactor.getTable().getKeyOrder();
+        /*System.out.println(Arrays.toString(keys1));
+        System.out.println(factor1);
+        System.out.println(Arrays.toString(keys2));
+        System.out.println(factor2);*/
         Set<String> keySet = Arrays.stream(keys1).collect(Collectors.toSet());
         keySet.addAll(Arrays.stream(keys2).collect(Collectors.toSet()));
         String[] keyorder = keySet.toArray(new String[keySet.size()]);
@@ -30,9 +37,12 @@ public class factorOutput {
 
         while (itr.hasNext()) {
             itr.next();
-            newTable.getCPT().put(itr.getkey(keyorder),factor1.get(itr.getkey(keys1))*factor1.get(itr.getkey(keys1)) );
+            newTable.getCPT().put(itr.getkey(keyorder),factor1.get(itr.getkey(keys1))*factor2.get(itr.getkey(keys2)) );
             multOperations++;
+           
         }
+        //System.out.println(Arrays.toString(newTable.getKeyOrder()));
+        //System.out.println(newTable.getCPT());
         this.table=newTable;
     }
 
@@ -60,18 +70,23 @@ public class factorOutput {
             if(newTable.getCPT().containsKey(newKey)){
                 newTable.getCPT().replace( newKey, newTable.getCPT().get(newKey) + factor.getCPT().get(oldKey));
                 addOperations++;
+               
             }
             
             else{
                 newTable.getCPT().put(newKey, factor.getCPT().get(oldKey));
             }
+            
         }
-        
+     this.table=newTable;
+
     }
 
 
     public CPTNode getTable() {
         return this.table;
     }
-
+    public String toString(){
+        return Arrays.toString(this.table.getKeyOrder());
+    }
 }

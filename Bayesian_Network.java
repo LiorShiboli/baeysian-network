@@ -153,8 +153,7 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
         }
 
         String[] order = variableMap.keySet().toArray(new String[variableMap.size()]);
-        List<String> factorKeys = Arrays.asList(CPTNodes.get(variable).getKeyOrder());
-        
+        List<String> factorKeys = new ArrayList<String>( Arrays.asList( CPTNodes.get(variable).getKeyOrder()));
         factorKeys.removeAll(givenVariables.keySet());
 
         CPTNode factor= new CPTNode(factorKeys.stream().toArray(String[]::new));
@@ -183,10 +182,12 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
     //choose a variable(either by the method specified on the algorithm)
     //join all of the variables containing it into one factor
     //cruelly eliminate that variable from that factor
+    
     while (!hiddenVariableSet.isEmpty()) {
+        //System.out.println(hiddenVariableSet);
         String variable = choose(hiddenVariableSet,factorSet,algorithm);
         hiddenVariableSet.remove(variable);
-        System.out.println("eliminate" + variable);
+        
         ArrayList<factorOutput> joinList = new ArrayList<factorOutput>();
         //get all the factors we want to join
         for (factorOutput factor : factorSet) {
@@ -194,6 +195,7 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
                 joinList.add(factor);
             }
         }
+        factorSet.removeAll(joinList);
         //just sorting by the order we want to join
         joinList.sort(new Comparator<factorOutput>() {
             public int compare(factorOutput factor1,factorOutput factor2){
@@ -222,15 +224,17 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
         //important bits are here!! 
         //after all our hard work eliminating and joining is easy(even if you look inside those functions)
         newfactor = joinList.get(0);
+        //System.out.println(joinList);
         for (int i = 1; i < joinList.size(); i++) {
             newfactor.join(joinList.get(i),variableOutcomes);
         }
         
         newfactor.eliminate(variable,this.variableOutcomes);
-        factorSet.removeAll(joinList);
+        
         if (newfactor.getTable().getCPT().size()!=1) {
             factorSet.add(newfactor);
         }
+        
        
     }
     // if we did our job right we should have only one factor in the factor set
@@ -243,11 +247,12 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
     float nonNormalizedProbability=0;
     permutation_iterator itr = new permutation_iterator(variableOutcomes, new  String[]{Query} );
     //System.out.println(finalFactor.table.getKeyOrder()[0]);
-    
+    //System.out.println(Arrays.toString(finalFactor.table.getKeyOrder())+" "+Query);
+    System.out.println(finalFactor.table.getCPT());
     String key = itr.getkey(finalFactor.table.getKeyOrder());
     
     float Probability = finalFactor.table.getCPT().get(key);
-    if  (itr.get_outcome(Query)==QueryOutcome){
+    if  (itr.get_outcome(Query).equals(QueryOutcome)){
         
         nonNormalizedProbability = Probability;
     }
@@ -256,11 +261,11 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
         itr.next();
         key = itr.getkey(finalFactor.table.getKeyOrder());
         Probability = finalFactor.table.getCPT().get(key);
-        if  (itr.get_outcome(Query)==QueryOutcome){
+        if  (itr.get_outcome(Query).equals(QueryOutcome)){
             
             nonNormalizedProbability = Probability;
         }
-        probabilityOutput.updateOutput(Probability,0,0);
+        probabilityOutput.add(Probability);
     }
     probabilityOutput.updateOutput(nonNormalizedProbability/probabilityOutput.getOutput(), finalFactor.multOperations,finalFactor.addOperations );
     return probabilityOutput;
