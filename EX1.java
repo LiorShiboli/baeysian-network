@@ -36,7 +36,7 @@ public class Ex1 {
                 String Query = variableMatcher.group(1);
                 String QueryOutcome = outcomeMatcher.group(1);
                 HashMap<String,String> variableMap = new HashMap<String,String>();
-                while (variableMatcher.find()&&outcomeMatcher.find()) {
+                while (variableMatcher.find() && outcomeMatcher.find()) {
                     variableMap.put(variableMatcher.group(1), outcomeMatcher.group(1));
                 }
                 //calculate probability using defined algorithm

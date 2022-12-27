@@ -24,16 +24,18 @@ public class CPTNode {
        
         Collections.reverse(Arrays.asList(parents));
        
-        //
+        //construct the order to the CPT 
         String[] order=new String[parents.length+1];
         order[0]=variableName;
         for (int i = 0; i < parents.length; i++) {
             order[i+1]=parents[i];
         }
+
         this.keyOrder=order;
         HashMap<String, String[]> subMap = new HashMap<String, String[]>(variables);
         subMap.keySet().retainAll(Arrays.asList(parents));
         this.CPT= new HashMap<String,Float>();
+        //for each permutation of the outcomes put the corresponding element
         permutation_iterator itr= new permutation_iterator(variables, order);
         String[] table=definition.getElementsByTagName("TABLE").item(0).getTextContent().split(" ");
         for (int i = 0; i<table.length ; i++, itr.next()) {

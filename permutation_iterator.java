@@ -22,7 +22,7 @@ public class permutation_iterator implements Iterator<Boolean> {
     public String[] getVariables() {
         return variables;
     }
-    //like get key but by the order given
+    //like get key but by the order given in the start of the function
     public String getPermutation(){
         String permutation="";
             for (int j = 0; j < variables.length; j++) {
@@ -57,7 +57,8 @@ public class permutation_iterator implements Iterator<Boolean> {
     public String get_outcome(String variable){  
     return variableOutcomes.get(variable)[indexes.get(variable)];
     }
-    //get key for permutation the key order (doesnt have to contain all the variables)
+    //get key for permutation the key order (doesnt have to contain all the variables),
+    //given a key order will get the key to the entry corresponding to the outcomes in the permutation
     public String getkey(String[] order) {
     String key="";
     for (int j = 0; j < order.length; j++) {

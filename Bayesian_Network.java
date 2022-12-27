@@ -135,7 +135,8 @@ public class Bayesian_Network {
     
     
 /**
- * this function uses variable elimination 
+ * this function uses variable elimination to calulate a given probability using givan heuristic
+ * https://en.wikipedia.org/wiki/Variable_elimination
  * @param givenVariables a map that relates the given variables to their given outcomes
  * @param Query which variable we want to calculate the probability to given the other variables
  * @param QueryOutcome what outcome we want to caluculate the probability to
@@ -367,14 +368,15 @@ private String choose(Set<String> hiddenVariableSet, Set<factorOutput> factorSet
  * @param QueryOutcome outcome query variable
  * @return the probability of all of the variables and the query happening with the given outcomes,the joint probability
  * uses the baeysian network property that P(X1,X2,,,,Xn) = multiplication_{i->n}(P(Xi|parents(Xi))
- * given that there are n variables
+ * given that those are all the variables
+ * and using the law of total probability https://en.wikipedia.org/wiki/Law_of_total_probability 
  */
 private funcOutput naiveCalculatejointProbability(HashMap<String, String> givenVariables,String Query,String QueryOutcome) {
     //start all the data we need
     HashMap<String,String> variables=new HashMap<String,String>(givenVariables);
     variables.put(Query, QueryOutcome);
 
-    //create a map that represents whats the possuble outcomes for which variable
+    //create a map that represents whats the possible outcomes for which variable
     HashMap<String,String[]> variableMap = new HashMap<String,String[]>(variableOutcomes);
     for (String variable : variables.keySet()) {
         
@@ -382,7 +384,8 @@ private funcOutput naiveCalculatejointProbability(HashMap<String, String> givenV
     }
     String[] order =variableMap.keySet().toArray(new String[variableMap.size()]);
     
-    
+    //calculate probability by the law of total probability and by the baeysian network rule we mentioned above
+    //first go through the first permutation(to slightly reduce our addition and multiplication operations,needed for assignment)
     permutation_iterator permutation = new permutation_iterator(variableMap, order );
     String variable=permutation.getVariables()[0];
     String key=permutation.getkey(CPTNodes.get(permutation.getVariables()[0]).getKeyOrder());
