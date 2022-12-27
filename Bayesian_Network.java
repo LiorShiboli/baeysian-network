@@ -178,18 +178,18 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
     for (String variable :ancestorSet) {
         CPTNode node = CPTNodes.get(variable);
         //create factor
+        List<String> factorKeys = new ArrayList<String>( Arrays.asList( CPTNodes.get(variable).getKeyOrder()));
+        factorKeys.removeAll(givenVariables.keySet());
+        CPTNode factor = new CPTNode(factorKeys.stream().toArray(String[]::new));
+
         HashMap<String,String[]> variableMap = new HashMap<String,String[]>(variableOutcomes);
         variableMap.keySet().retainAll(Arrays.asList(CPTNodes.get(variable).getKeyOrder()));
         for (String given : givenVariables.keySet()) {
-            //System.out.println(variable);
             variableMap.replace(given, new  String[]{givenVariables.get(given)});
         }
 
         String[] order = variableMap.keySet().toArray(new String[variableMap.size()]);
-        List<String> factorKeys = new ArrayList<String>( Arrays.asList( CPTNodes.get(variable).getKeyOrder()));
-        factorKeys.removeAll(givenVariables.keySet());
-
-        CPTNode factor= new CPTNode(factorKeys.stream().toArray(String[]::new));
+        
         permutation_iterator permutation = new permutation_iterator(variableMap, order );
         //tricky bit of code to write concisely,
         //puts the variable into the factor but without the unnecessary variables(those that are given)
@@ -361,11 +361,20 @@ private String choose(Set<String> hiddenVariableSet, Set<factorOutput> factorSet
     }
 }
 
+/**
+ * @param givenVariables given variables and their outcomes
+ * @param Query query variable
+ * @param QueryOutcome outcome query variable
+ * @return the probability of all of the variables and the query happening with the given outcomes,the joint probability
+ * uses the baeysian network property that P(X1,X2,,,,Xn) = multiplication_{i->n}(P(Xi|parents(Xi))
+ * given that there are n variables
+ */
 private funcOutput naiveCalculatejointProbability(HashMap<String, String> givenVariables,String Query,String QueryOutcome) {
     //start all the data we need
     HashMap<String,String> variables=new HashMap<String,String>(givenVariables);
     variables.put(Query, QueryOutcome);
 
+    //create a map that represents whats the possuble outcomes for which variable
     HashMap<String,String[]> variableMap = new HashMap<String,String[]>(variableOutcomes);
     for (String variable : variables.keySet()) {
         
@@ -379,7 +388,7 @@ private funcOutput naiveCalculatejointProbability(HashMap<String, String> givenV
     String key=permutation.getkey(CPTNodes.get(permutation.getVariables()[0]).getKeyOrder());
     funcOutput probability = new funcOutput(CPTNodes.get(variable).getCPT().get(key));
 
-    
+
     for (int i = 1; i < permutation.getVariables().length; i++) {
         variable=permutation.getVariables()[i];
         
