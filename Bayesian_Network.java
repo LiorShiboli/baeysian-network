@@ -331,10 +331,6 @@ private funcOutput naiveCalculatejointProbability(HashMap<String, String> givenV
     //start all the data we need
     HashMap<String,String> variables=new HashMap<String,String>(givenVariables);
     variables.put(Query, QueryOutcome);
-    int additionOperations=0;
-    int multOperations=0;
-    funcOutput queryOutput= new funcOutput(0);
-
 
     HashMap<String,String[]> variableMap = new HashMap<String,String[]>(variableOutcomes);
     for (String variable : variables.keySet()) {
@@ -347,14 +343,14 @@ private funcOutput naiveCalculatejointProbability(HashMap<String, String> givenV
     permutation_iterator permutation = new permutation_iterator(variableMap, order );
     String variable=permutation.getVariables()[0];
     String key=permutation.getkey(CPTNodes.get(permutation.getVariables()[0]).getKeyOrder());
-    float probability=CPTNodes.get(variable).getCPT().get(key);
+    funcOutput probability = new funcOutput(CPTNodes.get(variable).getCPT().get(key));
     for (int i = 1; i < permutation.getVariables().length; i++) {
         variable=permutation.getVariables()[i];
         
         key=permutation.getkey(CPTNodes.get(variable).getKeyOrder());
         
-        probability*=CPTNodes.get(variable).getCPT().get(key);
-        multOperations++;
+        probability.multiply(CPTNodes.get(variable).getCPT().get(key));
+        
     }
     
      while (permutation.hasNext()) {
@@ -362,22 +358,19 @@ private funcOutput naiveCalculatejointProbability(HashMap<String, String> givenV
         permutation.next();
         variable=permutation.getVariables()[0];
         key=permutation.getkey(CPTNodes.get(permutation.getVariables()[0]).getKeyOrder());
-        float permutationProbability=CPTNodes.get(variable).getCPT().get(key);
+        funcOutput permutationProbability = new funcOutput(CPTNodes.get(variable).getCPT().get(key));
+        
         for (int i = 1; i < permutation.getVariables().length; i++) {
             variable=permutation.getVariables()[i];
             key=permutation.getkey(CPTNodes.get(variable).getKeyOrder());
             
-            permutationProbability*=CPTNodes.get(variable).getCPT().get(key);
-            multOperations++;
+            permutationProbability.multiply(CPTNodes.get(variable).getCPT().get(key));
+            
         }
-        
-        probability+=permutationProbability;
-        additionOperations++;
+        probability.add(permutationProbability);
     }
-
     
-    queryOutput.updateOutput(probability,multOperations,additionOperations);
-    return queryOutput;
+    return probability;
 }
 
 }

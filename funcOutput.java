@@ -9,7 +9,7 @@ public class funcOutput {
     public funcOutput(float output){
         this.multOperations=0;
         this.additionOperations=0;
-        this.output=0;
+        this.output=output;
         
     }
     public void updateOutput(float output,int multOperations,int additionOperations){
@@ -44,6 +44,10 @@ public class funcOutput {
     public void add(float output) {
         this.additionOperations++;
         this.output+= output;
+    }
+    public void multiply(Float factor) {
+        this.multOperations++;
+        this.output *= factor;
     }
     
 }
