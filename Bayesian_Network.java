@@ -103,10 +103,11 @@ public class Bayesian_Network {
      */
     public funcOutput naiveQuery(HashMap<String,String> givenVariables,String Query,String QueryOutcome){
         //check if we can just get the answer straight from the CPT
+        System.out.println(givenVariables.keySet()+""+Arrays.asList(CPTNodes.get(Query).getParents()));
         if (givenVariables.keySet().equals( new HashSet<>(Arrays.asList(CPTNodes.get(Query).getParents())))) {
-            String key=QueryOutcome;
+            String key=QueryOutcome+",";
             for (int i = 0; i < CPTNodes.get(Query).getParents().length; i++) {
-                key+=givenVariables.get(CPTNodes.get(Query).getParents()[i]);
+                key+=givenVariables.get(CPTNodes.get(Query).getParents()[i])+",";
             }
             return new funcOutput(CPTNodes.get(Query).getCPT().get(key));
         }
@@ -146,9 +147,9 @@ public class Bayesian_Network {
 public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, String Query,String  QueryOutcome,int heuristic) {
     //if  we can answer the query straight answer it
     if (givenVariables.keySet().equals( new HashSet<>(Arrays.asList(CPTNodes.get(Query).getParents())))) {
-        String key=QueryOutcome;
+        String key=QueryOutcome+",";
         for (int i = 0; i < CPTNodes.get(Query).getParents().length; i++) {
-            key+=givenVariables.get(CPTNodes.get(Query).getParents()[i]);
+            key+=givenVariables.get(CPTNodes.get(Query).getParents()[i])+",";
         }
         return new funcOutput(CPTNodes.get(Query).getCPT().get(key));
     }
