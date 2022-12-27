@@ -21,9 +21,19 @@ import java.util.Queue;
 import java.util.Set;
 
 public class Bayesian_Network {
+    /**
+     * contains an array of possible outcomes for each variable
+     */
     private HashMap<String,String[]> variableOutcomes;
+    
+    /**
+     *contains a node for each variable,the node contains the variable, its parents and the probability table given them
+     */
     private HashMap<String,CPTNode> CPTNodes;
-    //creates new bayesian network from an xml file (takes an address or name if in the same file)
+   
+    /**
+     * @param file xml file deescribing the network
+     */
     public Bayesian_Network(String file){
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         try {
@@ -83,6 +93,14 @@ public class Bayesian_Network {
 
     }
     
+    /**
+     * this function uses a naive approach using the fact that P(X1=x1|X2=x2,....,Xn=xn )=P(X1=x1,X2=x2,....,Xn=xn )/P(X2=x2,....,Xn=xn )=
+     *P(X1=x1,X2=x2,....,Xn=xn )/sum_{an outcome of X1}(P(X1=a,X2=x2,....,Xn=xn )) 
+     * @param givenVariables a map that relates the given variables to their given outcomes
+     * @param Query which variable we want to calculate the probability to given the other variables
+     * @param QueryOutcome what outcome we want to caluculate the probability to
+     * @return an output object containing the probability to and how many addition and multiplacation opertions we have done
+     */
     public funcOutput naiveQuery(HashMap<String,String> givenVariables,String Query,String QueryOutcome){
         //check if we can just get the answer straight from the CPT
         if (givenVariables.keySet().equals( new HashSet<>(Arrays.asList(CPTNodes.get(Query).getParents())))) {
@@ -96,16 +114,17 @@ public class Bayesian_Network {
         //calculate the joint probability of the given variables and query
         funcOutput totalProbabilitySum = naiveCalculatejointProbability( givenVariables,Query,QueryOutcome);
         float QueryProbability = totalProbabilitySum.getOutput();
+
         //sum the rest to find out the normalization factor
         //reminder: P(X1=x1|X2=x2,....,Xn=xn )=P(X1=x1,X2=x2,....,Xn=xn )/P(X2=x2,....,Xn=xn )=
         //P(X1=x1,X2=x2,....,Xn=xn )/sum_{a outcome of X1}(P(X1=a,X2=x2,....,Xn=xn )) 
+
         for (String outcome : variableOutcomes.get(Query)) {
             if(!outcome.equals(QueryOutcome)){
             funcOutput outcomeProbability = naiveCalculatejointProbability( givenVariables,Query,outcome);
             totalProbabilitySum.add(outcomeProbability);
             
         }
-            
         }
         //normalize the the query probability by the sum of all the joint probabilities
         totalProbabilitySum.updateOutput(QueryProbability/totalProbabilitySum.getOutput(), 0, 0);
@@ -115,7 +134,15 @@ public class Bayesian_Network {
 }
     
     
-public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, String Query,String  QueryOutcome,int algorithm) {
+/**
+ * this function uses variable elimination 
+ * @param givenVariables a map that relates the given variables to their given outcomes
+ * @param Query which variable we want to calculate the probability to given the other variables
+ * @param QueryOutcome what outcome we want to caluculate the probability to
+ * @param heuristic an int representing the the heuristic we want to use in order to choose the variable
+ * @return an output object containing the probability to and how many addition and multiplacation opertions we have done
+ */
+public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, String Query,String  QueryOutcome,int heuristic) {
     //if  we can answer the query straight answer it
     if (givenVariables.keySet().equals( new HashSet<>(Arrays.asList(CPTNodes.get(Query).getParents())))) {
         String key=QueryOutcome;
@@ -130,7 +157,7 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
     funcOutput probabilityOutput = new funcOutput(0);
     //find all ancestors of given variables
     Set<String> ancestorSet= new HashSet<String>();
-    //run BFS to discover all nodes 
+    //run BFS to discover all nodes that are ancenstors to our wanted variables
     Queue<String> queue = new ArrayDeque<String>(givenVariables.keySet());
     queue.add(Query);
     String currentVariable;
@@ -146,6 +173,8 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
 
     Set<factorOutput> factorSet = new HashSet<>(); 
     //create factors
+    // for each variable that matters create a a factor containing a table that contains only the releavent entries,
+    // those that are possible given the variables that are given
     for (String variable :ancestorSet) {
         CPTNode node = CPTNodes.get(variable);
         //create factor
@@ -191,29 +220,29 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
     //join all of the variables containing it into one factor
     //cruelly eliminate that variable from that factor
     while (!hiddenVariableSet.isEmpty()) {
-        //System.out.println(factorSet);
-        //System.out.println(hiddenVariableSet);
-        String variable = choose(hiddenVariableSet,factorSet,variableOutcomes, algorithm);
+        // choose a variable from our hidden variables to eliminate and remove it from the variables we want to eliminate
+        String variable = choose(hiddenVariableSet,factorSet, heuristic);
         hiddenVariableSet.remove(variable);
         
         ArrayList<factorOutput> joinList = new ArrayList<factorOutput>();
-        //get all the factors we want to join
+        //get all the factors we want to join and remove them from our list
         for (factorOutput factor : factorSet) {
             if (Arrays.asList( factor.getTable().getKeyOrder()).contains(variable)) {
                 joinList.add(factor);
             }
         }
-        //System.out.println("factor set = "+ factorSet+" joinlist = "+joinList);
         factorSet.removeAll(joinList);
+
         //just sorting by the order we want to join
         joinList.sort(new Comparator<factorOutput>() {
             public int compare(factorOutput factor1,factorOutput factor2){
                 CPTNode node1 =factor1.getTable();
                 CPTNode node2 =factor2.getTable();
+                //by cpt size
                 if (node1.getCPT().size()!=node2.getCPT().size()){
                     return node1.getCPT().size() - node2.getCPT().size();
                 }
-                //else ASCII sum
+                //else ASCII sum of variables
                 int node1Sum=0;
                 for (String variable: node1.getKeyOrder()) {
                     for (int i = 0; i < variable.length(); i++) {
@@ -233,7 +262,6 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
         //important bits are here!! 
         //after all our hard work eliminating and joining is easy(even if you look inside those functions)
         newfactor = joinList.get(0);
-        //System.out.println(joinList);
         for (int i = 1; i < joinList.size(); i++) {
             newfactor.join(joinList.get(i),variableOutcomes);
         }
@@ -282,10 +310,16 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
 }
 
 
-//choose a variable to eliminate based on given algorithm
-private String choose(Set<String> hiddenVariableSet, Set<factorOutput> factorSet, HashMap<String,String[]> variableOutcomes,int algorithm) {
+
+/**
+ * @param hiddenVariableSet the variable set to choose from
+ * @param factorSet the factors we want to eliminate
+ * @param heuristic an integer representing the heuristic we want to use
+ * @return the variable chosen by the heuristic given the factors exisiting and the variables we want to choose from
+ */
+private String choose(Set<String> hiddenVariableSet, Set<factorOutput> factorSet,int heuristic) {
     
-    switch (algorithm) {
+    switch (heuristic) {
         case 2:
         //order by lexicographic order on the variables,each time choose the smallest by that order
             return Collections.min(hiddenVariableSet);
@@ -344,6 +378,8 @@ private funcOutput naiveCalculatejointProbability(HashMap<String, String> givenV
     String variable=permutation.getVariables()[0];
     String key=permutation.getkey(CPTNodes.get(permutation.getVariables()[0]).getKeyOrder());
     funcOutput probability = new funcOutput(CPTNodes.get(variable).getCPT().get(key));
+
+    
     for (int i = 1; i < permutation.getVariables().length; i++) {
         variable=permutation.getVariables()[i];
         
@@ -359,7 +395,7 @@ private funcOutput naiveCalculatejointProbability(HashMap<String, String> givenV
         variable=permutation.getVariables()[0];
         key=permutation.getkey(CPTNodes.get(permutation.getVariables()[0]).getKeyOrder());
         funcOutput permutationProbability = new funcOutput(CPTNodes.get(variable).getCPT().get(key));
-        
+
         for (int i = 1; i < permutation.getVariables().length; i++) {
             variable=permutation.getVariables()[i];
             key=permutation.getkey(CPTNodes.get(variable).getKeyOrder());
