@@ -44,7 +44,7 @@ public class Bayesian_Network {
 
                     Element variable = (Element) node;
                     String variableName= (String) variable.getElementsByTagName("NAME").item(0).getTextContent();
-                    //get the outcomes
+                    //get the outcomes and put them in a hash table to connect them to the variable
                     NodeList outcomesList =variable.getElementsByTagName("OUTCOME");
                     String[] outcomes= new String[outcomesList.getLength()];
                     for (int i = 0; i < outcomesList.getLength() ; i++) {
@@ -56,7 +56,7 @@ public class Bayesian_Network {
             }
 
 
-
+            //construct CPTNodes and connect each one to the variable it represents 
             NodeList CPTdefinitions = document.getElementsByTagName("DEFINITION");
             HashMap<String,CPTNode> CPTNodes=new HashMap<String,CPTNode>();
             for (int definitionNum = 0; definitionNum < CPTdefinitions.getLength() ;definitionNum++) {
@@ -69,6 +69,7 @@ public class Bayesian_Network {
                 }
 
             }
+            //finally assign the data
             this.variableOutcomes=varOutcomes;
             this.CPTNodes=CPTNodes;
 
@@ -83,6 +84,7 @@ public class Bayesian_Network {
     }
     
     public funcOutput naiveQuery(HashMap<String,String> givenVariables,String Query,String QueryOutcome){
+        //check if we can just get the answer straight from the CPT
         if (givenVariables.keySet().equals( new HashSet<>(Arrays.asList(CPTNodes.get(Query).getParents())))) {
             String key=QueryOutcome;
             for (int i = 0; i < CPTNodes.get(Query).getParents().length; i++) {
@@ -91,9 +93,12 @@ public class Bayesian_Network {
             return new funcOutput(CPTNodes.get(Query).getCPT().get(key));
         }
         
-        
-        funcOutput totalProbabilitySum =naiveCalculatejointProbability( givenVariables,Query,QueryOutcome);
+        //calculate the joint probability of the given variables and query
+        funcOutput totalProbabilitySum = naiveCalculatejointProbability( givenVariables,Query,QueryOutcome);
         float QueryProbability = totalProbabilitySum.getOutput();
+        //sum the rest to find out the normalization factor
+        //reminder: P(X1=x1|X2=x2,....,Xn=xn )=P(X1=x1,X2=x2,....,Xn=xn )/P(X2=x2,....,Xn=xn )=
+        //P(X1=x1,X2=x2,....,Xn=xn )/sum_{a outcome of X1}(P(X1=a,X2=x2,....,Xn=xn )) 
         for (String outcome : variableOutcomes.get(Query)) {
             if(!outcome.equals(QueryOutcome)){
             funcOutput outcomeProbability = naiveCalculatejointProbability( givenVariables,Query,outcome);
@@ -102,6 +107,7 @@ public class Bayesian_Network {
         }
             
         }
+        //normalize the the query probability by the sum of all the joint probabilities
         totalProbabilitySum.updateOutput(QueryProbability/totalProbabilitySum.getOutput(), 0, 0);
 
         return totalProbabilitySum;
@@ -275,7 +281,10 @@ public funcOutput VECalculateProbabilty(HashMap<String, String> givenVariables, 
     return probabilityOutput;
 }
 
+
+//choose a variable to eliminate based on given algorithm
 private String choose(Set<String> hiddenVariableSet, Set<factorOutput> factorSet, HashMap<String,String[]> variableOutcomes,int algorithm) {
+    
     switch (algorithm) {
         case 2:
         //order by lexicographic order on the variables,each time choose the smallest by that order
@@ -302,6 +311,7 @@ private String choose(Set<String> hiddenVariableSet, Set<factorOutput> factorSet
                     }
                     int joinedFactorSize1 = 1;
                     int joinedFactorSize2 = 1;
+                    //calculate the size of those factors
                     for (String variable : joinedVariables1) {
                         joinedFactorSize1 *= variableOutcomes.get(variable).length ;
                     }
